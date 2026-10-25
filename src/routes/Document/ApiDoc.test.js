@@ -24,11 +24,22 @@ import {
 } from "../../services/api";
 import ApiDoc from "./ApiDoc";
 
-jest.mock("../../services/api", () => ({
-  fetchShenYuDictByType: jest.fn(),
-  getApiDetail: jest.fn(),
-  getApiMockRequest: jest.fn(),
-}));
+jest.mock("../../utils/request", () => jest.fn());
+jest.mock("../../utils/download", () => jest.fn());
+jest.mock("../../services/api", () => {
+  // The real service reads the gateway base URL when the module is imported.
+  const httpPath = global.document.createElement("span");
+  httpPath.id = "httpPath";
+  global.document.body.appendChild(httpPath);
+  const api = jest.requireActual("../../services/api");
+  httpPath.remove();
+  return {
+    ...api,
+    fetchShenYuDictByType: jest.fn(),
+    getApiDetail: jest.fn(),
+    getApiMockRequest: jest.fn(),
+  };
+});
 
 jest.mock("./components/SearchApi", () => {
   const ReactModule = jest.requireActual("react");
